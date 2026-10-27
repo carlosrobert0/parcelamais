@@ -173,13 +173,52 @@ O domínio foi separado justamente para isso. No Xano, `POST /pre-approvals` ser
 
 ## Como usei IA
 
-Usei o Claude Code do planejamento à revisão, sempre com testes rodando a cada etapa.
+Trabalhei com o Claude Code de forma **guiada por especificação**: a IA escreve e verifica o código, mas dentro de uma spec e de regras que eu defini. Nada entra sem teste, e toda decisão precisa ser algo que eu consiga explicar e alterar ao vivo.
 
-- **Plano:** a IA propôs stack, arquitetura, contrato da API, modelo do banco e plano de testes a partir do enunciado. Discuti os trade-offs e aprovei antes de qualquer código.
-- **Código:** gerado em blocos (fundação → domínio → backend → front → entrega), cada bloco com seus testes.
-- **Verificação:** além dos testes, a IA usou `curl`, um consumidor SSE, Playwright com screenshots (desktop e mobile), `docker compose` do zero e Lighthouse. Foi assim que apareceram bugs reais:
-  - o trigger do NOTIFY usava `CASE`, que no PL/pgSQL resolve o campo dos dois ramos e quebrava a conclusão da consulta (trocado por `IF`; desde então os testes de API rodam contra o Postgres real);
-  - um campo com erro só revalidava no blur, e o blur no `mousedown` do botão fazia a mensagem sumir, o botão subir e o clique se perder.
-- **Code review:** rodadas com agentes revisores independentes (backend/concorrência, front/estado/acessibilidade, regras de negócio e qualidade dos testes com testes de mutação, prontidão para entrega). Os achados foram reproduzidos antes de corrigidos. Entre eles: tela presa se o SSE falhasse (agora cai para polling), clique duplo criando duas pré-aprovações, rascunho do paciente anterior vazando para o próximo, renda gigante estourando a coluna do banco, ordenação por custo total favorecendo aprovação parcial e testes que passavam mesmo com o código errado.
-- **Padronização:** pedi o código todo em inglês (só o conteúdo de tela em português), sem comentários e com clean code. A IA reescreveu a base com os nomes novos e os testes cobrindo o que a revisão encontrou.
-- **O que é meu:** as decisões de produto e de arquitetura, a revisão do código e a responsabilidade de explicar e alterar cada parte ao vivo.
+**1. Spec antes do código.** Antes de qualquer linha de código, montei com a IA uma especificação (fora do repositório) e a usei como contrato do trabalho:
+- **stack com alternativas comparadas** (prós, contras e veredito): Vite + Fastify, Next.js full stack, Supabase e NestJS. Escolhi Next.js full stack com o domínio isolado do framework, e Drizzle em vez de Prisma por causa do `LISTEN/NOTIFY` no mesmo driver;
+- **arquitetura**: domínio puro, orquestrador com uma porta de gravação (sem conhecer o banco), tempo real com SSE + `LISTEN/NOTIFY` em vez de polling ou WebSocket, e a URL como estado da jornada;
+- **contrato da API e modelo do banco**: rotas, códigos de status (201/200/409/422), tabelas e constraints;
+- **regras de negócio** tiradas do enunciado numa tabela, com as **interpretações dos pontos ambíguos** registradas (ex.: a Beta sempre aprova, então "nenhuma aprova" precisa de cenário forçado);
+- **plano de testes por camada** e um checklist em 5 blocos com estimativa de tempo.
+
+**2. Regras que eu dei para a IA seguir.**
+- Código pequeno e óbvio, sem abstração desnecessária, porque eu vou alterá-lo ao vivo.
+- Dinheiro sempre em centavos inteiros; regra de negócio só em `src/domain`, sem importar Next nem banco.
+- Testes cobrindo o que pode quebrar (timeout, falha, limites das regras), não só o caminho feliz.
+- Ao fim de cada bloco, um resumo das decisões que eu precisaria defender.
+- Não reabrir a stack sem um motivo forte.
+
+**3. Execução em blocos, cada um com testes:** fundação (Next, Docker, banco e migrations) → domínio puro → backend e tempo real → front → entrega.
+
+**4. Verificação além dos testes verdes.** A IA testou a API com `curl` e um consumidor SSE, dirigiu a UI com Playwright tirando screenshots no desktop e no celular, subiu o `docker compose` do zero e rodou o Lighthouse. Foi assim que apareceram bugs que os testes ainda não pegavam:
+- o trigger do NOTIFY usava `CASE`, que no PL/pgSQL resolve o campo dos dois ramos e travava a conclusão da consulta (trocado por `IF`; desde então os testes de API rodam contra o Postgres real);
+- um campo com erro só revalidava no blur, e o blur no `mousedown` do botão fazia a mensagem sumir, o botão subir e o clique se perder.
+
+**5. Code review independente, em rodadas.** Agentes revisores separados, cada um com um recorte e sem receber as minhas conclusões:
+- backend e concorrência; front, estado e acessibilidade; regras de negócio contra o enunciado;
+- qualidade dos testes **com testes de mutação** (o código é quebrado de propósito para ver se algum teste falha): 7 de 15 mutações passavam despercebidas, e cada uma ganhou um teste específico;
+- padrões de código; prontidão para entrega;
+- caça a bugs com carga e entradas hostis: 800 POSTs simultâneos, 1.000 clientes SSE, slowloris, corpo de 100 MB, byte NUL.
+
+Cada achado foi reproduzido antes de ser corrigido e ganhou um teste de regressão. Entre eles:
+- tela presa se o SSE falhasse (agora há polling de segurança);
+- clique duplo criando duas pré-aprovações;
+- o rascunho do paciente anterior aparecendo para o próximo;
+- dados do paciente vazando para o log num erro de banco;
+- o prazo de 10s escorregando sob carga;
+- a ordenação por custo total favorecendo quem aprova menos.
+
+**6. Padrões que eu impus depois da revisão.**
+- Código todo em inglês, sem comentários e com clean code; só o conteúdo de tela em português.
+- Só o essencial versionado, com commits atômicos no padrão Conventional Commits.
+- Ensaio do avaliador: clonar o repositório numa pasta limpa e subir com um único comando.
+
+**Onde a IA errou e foi corrigida.**
+- Uma expectativa errada num teste E2E: o código estava certo e o teste, não.
+- Um teste do prazo que passaria mesmo com o código antigo; foi refeito e validado por mutação.
+- Uma dependência removida por engano, que o typecheck pegou na hora.
+
+É por isso que nada entra sem teste e revisão.
+
+**O que é meu:** as escolhas de arquitetura e de produto, a interpretação do enunciado, as regras acima, a revisão do código e a responsabilidade de explicar e alterar cada parte ao vivo.
