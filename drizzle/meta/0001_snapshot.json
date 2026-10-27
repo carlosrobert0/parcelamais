@@ -1,0 +1,366 @@
+{
+  "id": "8cd11ae2-60b7-4dc1-ba70-826478c4c4df",
+  "prevId": "07ae0549-c137-4e8c-a5f0-d55bc026d946",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.lender_result": {
+      "name": "lender_result",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pre_approval_id": {
+          "name": "pre_approval_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lender_id": {
+          "name": "lender_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "lender_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "approved_amount_cents": {
+          "name": "approved_amount_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "monthly_rate": {
+          "name": "monthly_rate",
+          "type": "numeric(6, 4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "terms": {
+          "name": "terms",
+          "type": "integer[]",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latency_ms": {
+          "name": "latency_ms",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "responded_at": {
+          "name": "responded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "lender_result_pre_approval_id_pre_approval_id_fk": {
+          "name": "lender_result_pre_approval_id_pre_approval_id_fk",
+          "tableFrom": "lender_result",
+          "columnsFrom": [
+            "pre_approval_id"
+          ],
+          "tableTo": "pre_approval",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "lender_result_pre_approval_id_lender_id_unique": {
+          "name": "lender_result_pre_approval_id_lender_id_unique",
+          "columns": [
+            "pre_approval_id",
+            "lender_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.patient": {
+      "name": "patient",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "birth_date": {
+          "name": "birth_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phone": {
+          "name": "phone",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_income_cents": {
+          "name": "monthly_income_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "patient_cpf_unique": {
+          "name": "patient_cpf_unique",
+          "columns": [
+            "cpf"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pre_approval": {
+      "name": "pre_approval",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "patient_id": {
+          "name": "patient_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "treatment_amount_cents": {
+          "name": "treatment_amount_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "monthly_income_cents": {
+          "name": "monthly_income_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "age": {
+          "name": "age",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "scenario": {
+          "name": "scenario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "pre_approval_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pre_approval_patient_id_patient_id_fk": {
+          "name": "pre_approval_patient_id_patient_id_fk",
+          "tableFrom": "pre_approval",
+          "columnsFrom": [
+            "patient_id"
+          ],
+          "tableTo": "patient",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.selected_offer": {
+      "name": "selected_offer",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pre_approval_id": {
+          "name": "pre_approval_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lender_id": {
+          "name": "lender_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "term": {
+          "name": "term",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "installment_cents": {
+          "name": "installment_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_cents": {
+          "name": "total_cents",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "selected_at": {
+          "name": "selected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "selected_offer_pre_approval_id_pre_approval_id_fk": {
+          "name": "selected_offer_pre_approval_id_pre_approval_id_fk",
+          "tableFrom": "selected_offer",
+          "columnsFrom": [
+            "pre_approval_id"
+          ],
+          "tableTo": "pre_approval",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "selected_offer_pre_approval_id_unique": {
+          "name": "selected_offer_pre_approval_id_unique",
+          "columns": [
+            "pre_approval_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.lender_status": {
+      "name": "lender_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "approved",
+        "declined",
+        "unavailable"
+      ]
+    },
+    "public.pre_approval_status": {
+      "name": "pre_approval_status",
+      "schema": "public",
+      "values": [
+        "pending",
+        "completed"
+      ]
+    }
+  },
+  "schemas": {},
+  "views": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
