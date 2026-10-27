@@ -52,7 +52,7 @@ export function OffersTable({ preApproval, onConflict }: OffersTableProps) {
     <section aria-labelledby="offers-title" className="space-y-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="offers-title" className="text-lg font-semibold">
+          <h2 id="offers-title" className="text-xl font-semibold">
             Ofertas
           </h2>
           <p className="text-sm text-muted-foreground">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Eyebrow } from "@/components/ui/eyebrow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBRL } from "@/domain/format";
 import type { PreApproval } from "@/domain/types";
@@ -35,8 +36,9 @@ export function PreApprovalJourney({ id }: PreApprovalJourneyProps) {
   return (
     <div className="space-y-8">
       <section aria-labelledby="pre-approval-title" className="space-y-4">
-        <div>
-          <h1 id="pre-approval-title" className="text-xl font-semibold">
+        <div className="space-y-2">
+          <Eyebrow>Consulta em tempo real</Eyebrow>
+          <h1 id="pre-approval-title" className="text-3xl font-semibold tracking-tight">
             Pré-aprovação
           </h1>
           <p className="text-sm text-muted-foreground">

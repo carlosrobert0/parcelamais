@@ -7,6 +7,7 @@ import { FormProvider, useForm, type DefaultValues, type FieldErrors } from "rea
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Eyebrow } from "@/components/ui/eyebrow";
 import { FieldGroup } from "@/components/ui/field";
 import { DEADLINE_MS } from "@/domain/deadline";
 import { formatBRL } from "@/domain/format";
@@ -146,9 +147,10 @@ export function RegistrationForm({ showScenario = false, initialStep = "personal
     <FormProvider {...form}>
       <Card>
         <CardHeader>
+          <Eyebrow className="mb-2">Nova pré-aprovação</Eyebrow>
           <StepIndicator current={step} />
           <CardTitle>
-            <h1 ref={headingRef} tabIndex={-1} className="outline-none">
+            <h1 ref={headingRef} tabIndex={-1} className="text-2xl font-semibold outline-none">
               {currentStep.title}
             </h1>
           </CardTitle>
@@ -217,7 +219,7 @@ interface StepIndicatorProps {
 
 function StepIndicator({ current }: StepIndicatorProps) {
   return (
-    <ol className="mb-2 flex gap-2 text-xs text-muted-foreground" aria-label="Passos do cadastro">
+    <ol className="mb-3 flex flex-wrap gap-2 text-xs text-muted-foreground" aria-label="Passos do cadastro">
       {STEPS.map((step, index) => (
         <li
           key={step.id}
