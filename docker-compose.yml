@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: parcelamais
+      POSTGRES_PASSWORD: parcelamais
+      POSTGRES_DB: parcelamais
+    ports:
+      - "5432:5432"
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./docker/create-test-database.sql:/docker-entrypoint-initdb.d/create-test-database.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U parcelamais -d parcelamais"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    stop_grace_period: 30s
+    environment:
+      DATABASE_URL: postgres://parcelamais:parcelamais@db:5432/parcelamais
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  data:
