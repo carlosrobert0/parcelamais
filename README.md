@@ -120,7 +120,7 @@ Dinheiro sempre em **centavos inteiros** (API, banco e domínio). Taxa em `numer
 
 **Front: a URL é o estado da jornada.** `/pre-approvals/:id` reconstrói tudo do servidor (retomar após recarregar sai quase de graça). O cadastro é **um** `useForm` para os 3 passos (voltar não perde nada), com validação por passo, rascunho na `sessionStorage` (limpo ao começar o próximo paciente) e o **mesmo schema zod da API**. Erros 422 da API voltam para o campo certo, no passo certo, com o foco nele. Depois do envio o botão fica travado até a navegação terminar (nada de duas pré-aprovações por clique duplo). Na tela ao vivo, além do SSE, um polling de segurança (5s, ou 2s se o SSE caiu) garante que a tela termina mesmo com proxy ou rede ruins. As regras das financeiras não vão para o navegador.
 
-**Design system com a identidade da Parcela Mais.** shadcn/ui (Radix + Tailwind) com tokens tirados do site da empresa: Poppins, texto azul-marinho `#091747`, superfícies lavanda `#F3F3FB`, botões em pílula, rótulo de seção com traço (`Eyebrow`) e o gradiente ciano → azul como detalhe. O azul de ação é o `#136BC2`, e não o `#1E83C7`, porque com texto branco o segundo dá contraste 4,1 (abaixo do AA); ele fica só nos detalhes decorativos. Nenhum logo ou imagem da marca foi copiado.
+**Design system com a identidade da Parcela Mais.** shadcn/ui (Radix + Tailwind) com tokens tirados do site da empresa: Poppins, texto azul-marinho `#091747`, superfícies lavanda `#F3F3FB`, botões em pílula, rótulo de seção com traço (`Eyebrow`) e o gradiente ciano → azul como detalhe. O azul de ação é o `#136BC2`, e não o `#1E83C7`, porque com texto branco o segundo dá contraste 4,1 (abaixo do AA); ele fica só nos detalhes decorativos. O logo no cabeçalho é o da própria Parcela Mais, usado porque este case é para ela; foi recomposto em 4× (ícone em alta do site + texto em Poppins) para ficar nítido em telas retina.
 
 **Drizzle em vez de Prisma.** O `LISTEN` vem no mesmo driver (postgres.js), o schema se lê como SQL e não há geração de client (o `drizzle-kit` só gera as migrations).
 
@@ -149,7 +149,7 @@ Total: 153 testes Vitest + 9 E2E. Os testes críticos foram checados com mutaç�
 
 ## Performance e acessibilidade
 
-Lighthouse na página inicial (build de produção, emulação mobile): **Performance 96 · Acessibilidade 100 · Boas práticas 100**, CLS 0.
+Lighthouse na página inicial (build de produção, emulação mobile): **Performance 95 · Acessibilidade 100 · Boas práticas 100**, CLS 0.
 
 Componentes Radix/shadcn, labels e erros ligados por `aria-describedby`/`aria-invalid`, foco no título a cada passo, status das financeiras anunciado por `aria-live`, ordenação com `aria-pressed`, tudo operável por teclado.
 
