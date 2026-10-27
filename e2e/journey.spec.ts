@@ -106,7 +106,7 @@ test("registration: instant errors, and fixing the fields moves forward on the f
 
 test("the header link starts the next patient with an empty form, not the previous patient's draft", async ({ page }) => {
   await register(page, { scenario: "delta-fails" });
-  await page.getByRole("link", { name: /Parcela Mais/ }).click();
+  await page.getByRole("link", { name: "parcela mais" }).click();
   await expect(page.getByRole("heading", { name: "Dados pessoais" })).toBeVisible();
   await expect(page.getByLabel("Nome completo")).toHaveValue("");
   await expect(page.getByLabel("CPF")).toHaveValue("");
