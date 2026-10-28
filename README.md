@@ -31,7 +31,16 @@ npm run lint && npm run typecheck
 
 ## Forçar os cenários
 
-Pela UI: `/?demo=1` e escolha o cenário na revisão. Pela API:
+Pela UI: `/?demo=1` e escolha o cenário na revisão. Dados para preencher:
+
+| Paciente | Nome | CPF | Nascimento | Celular | Renda | Tratamento |
+|---|---|---|---|---|---|---|
+| Aprova (use com qualquer cenário) | Maria da Silva | 529.982.247-25 | 10/05/1990 | (11) 98765-4321 | R$ 5.000,00 | R$ 10.000,00 |
+| Recusas reais (use com `none-approve` ou `random`) | João Pereira | 111.444.777-35 | 10/05/2004 | (11) 91234-5678 | R$ 1.500,00 | R$ 25.000,00 |
+
+No segundo paciente, a Alfa recusa pela renda (× 10 < valor) e a Gama pela idade (< 25 anos); com `none-approve`, a tela sugere tentar R$ 15.000,00. Nos campos de dinheiro, digite com os centavos (`500000` vira R$ 5.000,00).
+
+Pela API:
 
 ```bash
 curl -s localhost:3000/api/pre-approvals -H 'content-type: application/json' -d '{
