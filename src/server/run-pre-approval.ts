@@ -9,6 +9,7 @@ import type { Scenario } from "@/domain/scenarios";
 import type { CreatePreApprovalRequest, Patient } from "@/domain/schemas";
 import { errorSummary, logger } from "./logger";
 import { completePreApproval, createPreApproval, saveLenderOutcome } from "./repository";
+import { retry } from "./retry";
 
 const SAVE_MARGIN_MS = 200;
 const SAVE_ATTEMPTS = 3;
@@ -65,13 +66,12 @@ async function saveAndLog(preApprovalId: string, lenderId: string, outcome: Lend
   const reason = outcome.status === "approved" ? undefined : outcome.reason;
   logger.info({ preApprovalId, lenderId, status: outcome.status, reason, latencyMs: outcome.latencyMs }, "lender responded");
 
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await saveLenderOutcome(preApprovalId, lenderId, outcome);
-    } catch (error) {
-      logger.warn({ preApprovalId, lenderId, attempt, ...errorSummary(error) }, "could not save lender outcome");
-      if (attempt === SAVE_ATTEMPTS) throw error;
-      await sleep(SAVE_RETRY_DELAY_MS);
-    }
-  }
+  await retry(() => saveLenderOutcome(preApprovalId, lenderId, outcome), {
+    attempts: SAVE_ATTEMPTS,
+    delayMs: SAVE_RETRY_DELAY_MS,
+    onRetry: (attempt, error) => logger.warn({ preApprovalId, lenderId, attempt, ...errorSummary(error) }, "could not save lender outcome"),
+  }).catch((error) => {
+    logger.error({ preApprovalId, lenderId, ...errorSummary(error) }, "gave up saving lender outcome");
+    throw error;
+  });
 }
