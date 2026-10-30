@@ -194,15 +194,15 @@ describe("GET /api/pre-approvals/:id", () => {
 });
 
 describe("deadline", () => {
-  it("counts the 10s from creation, even when the run starts late, and completes with a lender that never answers", async () => {
+  it("counts the 15s from creation, even when the run starts late, and completes with a lender that never answers", async () => {
     const neverForDelta = (ms: number) => (ms >= 4_000 ? new Promise<void>(() => {}) : Promise.resolve());
     const { id, run } = await startPreApproval(createPreApprovalSchema.parse({ patient, scenario: "random" }));
     await new Promise((resolve) => setTimeout(resolve, 1_000));
     await run({ sleep: neverForDelta, random: () => 0.5 });
 
     const [{ elapsedMs }] = await sql`select extract(epoch from completed_at - created_at) * 1000 as "elapsedMs" from pre_approval where id = ${id}`;
-    expect(Number(elapsedMs)).toBeGreaterThan(9_000);
-    expect(Number(elapsedMs)).toBeLessThan(10_100);
+    expect(Number(elapsedMs)).toBeGreaterThan(14_000);
+    expect(Number(elapsedMs)).toBeLessThan(15_100);
     const delta = (await fetchPreApproval(id)).results.find((result) => result.lenderId === "delta");
     expect(delta).toMatchObject({ status: "unavailable", reason: "timeout" });
   });

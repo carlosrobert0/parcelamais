@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { LENDERS } from "./lenders";
 import type { Lender, LenderInput, LenderResponse } from "./lenders/types";
-import { DEADLINE_MS } from "./deadline";
+import { DEADLINE_MS, MAX_DEADLINE_MS } from "./deadline";
 import { orchestrate, type LenderOutcome, type OrchestrationOptions } from "./orchestrator";
 import { SCENARIO_OVERRIDES } from "./lenders/scenario-overrides";
 import type { Scenario } from "./scenarios";
@@ -128,10 +128,18 @@ describe("orchestrate", () => {
     expect(saved).toEqual(["b"]);
   });
 
+  it("gives Delta 15s while every other lender keeps 10s", async () => {
+    const { saved, done } = start([slowLender("alfa", 12_000, () => approved), slowLender("delta", 12_000, () => approved)]);
+    await vi.advanceTimersByTimeAsync(12_000);
+    await done;
+    expect(saved.alfa).toEqual({ status: "unavailable", reason: "timeout", latencyMs: DEADLINE_MS });
+    expect(saved.delta).toMatchObject({ status: "approved", latencyMs: 12_000 });
+  });
+
   describe("with the real lenders", () => {
     async function runScenario(scenario: Scenario) {
       const run = start(LENDERS, { overrides: SCENARIO_OVERRIDES[scenario] });
-      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await vi.advanceTimersByTimeAsync(MAX_DEADLINE_MS);
       await run.done;
       return run.saved;
     }
@@ -148,9 +156,9 @@ describe("orchestrate", () => {
       expect([saved.alfa, saved.beta, saved.gama].every((outcome) => outcome.status === "approved")).toBe(true);
     });
 
-    it("delta-timeout: Delta unavailable by timeout at 10s", async () => {
+    it("delta-timeout: Delta unavailable by timeout at 15s", async () => {
       const saved = await runScenario("delta-timeout");
-      expect(saved.delta).toEqual({ status: "unavailable", reason: "timeout", latencyMs: DEADLINE_MS });
+      expect(saved.delta).toEqual({ status: "unavailable", reason: "timeout", latencyMs: MAX_DEADLINE_MS });
     });
 
     it("none-approve: all 4 decline", async () => {
@@ -158,12 +166,12 @@ describe("orchestrate", () => {
       expect(Object.values(saved).every((outcome) => outcome.status === "declined")).toBe(true);
     });
 
-    it("random: never exceeds 10s, even when Delta draws its maximum latency", async () => {
-      const { saved, done, isFinished } = start(LENDERS, { random: () => 0.99 });
-      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+    it("random: never exceeds 15s, even when Delta draws its maximum latency", async () => {
+      const { saved, done, isFinished } = start(LENDERS, { random: () => 1 });
+      await vi.advanceTimersByTimeAsync(MAX_DEADLINE_MS);
       await done;
       expect(isFinished()).toBe(true);
-      expect(saved.delta).toEqual({ status: "unavailable", reason: "timeout", latencyMs: DEADLINE_MS });
+      expect(saved.delta).toEqual({ status: "unavailable", reason: "timeout", latencyMs: MAX_DEADLINE_MS });
       expect([saved.alfa, saved.beta, saved.gama].map((outcome) => outcome.status)).toEqual(["approved", "approved", "approved"]);
     });
   });

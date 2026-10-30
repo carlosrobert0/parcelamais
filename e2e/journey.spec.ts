@@ -63,13 +63,13 @@ test("Delta fails: shown as unavailable while the other offers go on", async ({ 
   await expect(page.getByTestId("offer")).toHaveCount(9);
 });
 
-test("Delta times out: the journey moves on at 10s with Delta unavailable", async ({ page }) => {
+test("Delta times out: the journey moves on at 15s with Delta unavailable", async ({ page }) => {
   await register(page, { scenario: "delta-timeout" });
   await expect(lenderCard(page, "alfa")).toHaveAttribute("data-status", "approved", { timeout: 5_000 });
   await expect(lenderCard(page, "delta")).toHaveAttribute("data-status", "pending");
   await expect(page.getByText(/Aguardando respostas/)).toBeVisible();
 
-  await expect(lenderCard(page, "delta")).toHaveAttribute("data-status", "unavailable", { timeout: 12_000 });
+  await expect(lenderCard(page, "delta")).toHaveAttribute("data-status", "unavailable", { timeout: 17_000 });
   await expect(lenderCard(page, "delta")).toContainText("Não respondeu dentro de 10 segundos");
   await expect(page.getByTestId("offer")).toHaveCount(9);
 });

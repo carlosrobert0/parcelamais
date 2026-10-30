@@ -1,5 +1,5 @@
 import type { Lender, LenderInput, LenderResponse, QuoteContext, ScenarioOverride, Sleep } from "./lenders/types";
-import { DEADLINE_MS } from "./deadline";
+import { lenderDeadlineMs } from "./deadline";
 import type { UnavailableReason } from "./types";
 
 type Unavailable = { status: "unavailable"; reason: UnavailableReason };
@@ -10,31 +10,27 @@ export interface OrchestrationOptions {
   lenders: Lender[];
   overrides?: Record<string, ScenarioOverride>;
   save: (lenderId: string, outcome: LenderOutcome) => Promise<void>;
-  deadlineMs?: number;
   random?: () => number;
   sleep?: Sleep;
   now?: () => number;
+  deadlineMarginMs?: number;
 }
 
 export async function orchestrate(input: LenderInput, options: OrchestrationOptions): Promise<void> {
-  const { lenders, overrides = {}, save, deadlineMs = DEADLINE_MS, random = Math.random, sleep = wait, now = Date.now } =
+  const { lenders, overrides = {}, save, deadlineMarginMs = 0, random = Math.random, sleep = wait, now = Date.now } =
     options;
 
-  const deadline = new AbortController();
-  const timer = setTimeout(() => deadline.abort(new Error("deadline exceeded")), deadlineMs);
-
   async function quoteLender(lender: Lender) {
+    const deadline = new AbortController();
+    const deadlineMs = Math.max(0, lenderDeadlineMs(lender.id) - deadlineMarginMs);
+    const timer = setTimeout(() => deadline.abort(new Error("deadline exceeded")), deadlineMs);
     const startedAt = now();
     const context = { override: overrides[lender.id] ?? {}, signal: deadline.signal, random, sleep };
-    const response = await quoteOrUnavailable(lender, input, context);
+    const response = await quoteOrUnavailable(lender, input, context).finally(() => clearTimeout(timer));
     await save(lender.id, { ...response, latencyMs: Math.round(now() - startedAt) });
   }
 
-  try {
-    await Promise.allSettled(lenders.map(quoteLender));
-  } finally {
-    clearTimeout(timer);
-  }
+  await Promise.allSettled(lenders.map(quoteLender));
 }
 
 async function quoteOrUnavailable(lender: Lender, input: LenderInput, context: QuoteContext): Promise<LenderResponse | Unavailable> {

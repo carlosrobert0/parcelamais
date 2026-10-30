@@ -1,5 +1,5 @@
 import type { Scenario } from "../scenarios";
-import { DELTA_MAX_LATENCY_MS } from "./delta";
+import { MAX_DEADLINE_MS } from "../deadline";
 import { LENDERS } from "./index";
 import type { ScenarioOverride } from "./types";
 
@@ -18,6 +18,6 @@ export const SCENARIO_OVERRIDES: Record<Scenario, Overrides> = {
   random: {},
   "all-approve": forceAll("approve"),
   "delta-fails": { ...forceAll("approve"), delta: { latencyMs: FORCED_LATENCY_MS.delta, force: "error" } },
-  "delta-timeout": { ...forceAll("approve"), delta: { latencyMs: DELTA_MAX_LATENCY_MS, force: "approve" } },
+  "delta-timeout": { ...forceAll("approve"), delta: { latencyMs: MAX_DEADLINE_MS + 1_000, force: "approve" } },
   "none-approve": forceAll("decline"),
 };

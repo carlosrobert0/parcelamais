@@ -1,6 +1,6 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { ageToday } from "@/domain/age";
-import { DEADLINE_MS } from "@/domain/deadline";
+import { MAX_DEADLINE_MS } from "@/domain/deadline";
 import { LENDERS } from "@/domain/lenders";
 import { SCENARIO_OVERRIDES } from "@/domain/lenders/scenario-overrides";
 import type { LenderInput } from "@/domain/lenders/types";
@@ -28,7 +28,7 @@ export async function startPreApproval({ patient, scenario }: CreatePreApprovalR
   const { treatmentAmountCents, ...patientData } = patient;
   const input = toLenderInput(patient);
   const { id, createdAt } = await createPreApproval({ patient: patientData, treatmentAmountCents, age: input.age, scenario });
-  const run: PreApprovalRun = { id, input, scenario, deadlineAt: createdAt.getTime() + DEADLINE_MS };
+  const run: PreApprovalRun = { id, input, scenario, deadlineAt: createdAt.getTime() + MAX_DEADLINE_MS };
   return { id, run: (options?: RunOptions) => runPreApproval(run, options) };
 }
 
@@ -42,7 +42,7 @@ async function runPreApproval({ id, input, scenario, deadlineAt }: PreApprovalRu
         ...options,
         lenders: LENDERS,
         overrides: SCENARIO_OVERRIDES[scenario],
-        deadlineMs: Math.max(0, remainingMs - SAVE_MARGIN_MS),
+        deadlineMarginMs: MAX_DEADLINE_MS - remainingMs + SAVE_MARGIN_MS,
         save: (lenderId, outcome) => saveAndLog(id, lenderId, outcome),
       }),
       sleep(remainingMs, undefined, { signal: deadlineTimer.signal }).catch(() => {}),
