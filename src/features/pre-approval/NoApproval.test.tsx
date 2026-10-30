@@ -36,7 +36,7 @@ describe("NoApproval", () => {
   it("explains each lender's reason in plain language", () => {
     render(<NoApproval preApproval={preApproval()} />);
     expect(screen.getByText(/Valor acima de R\$\s20\.000,00/)).toBeInTheDocument();
-    expect(screen.getByText("Não respondeu dentro de 10 segundos")).toBeInTheDocument();
+    expect(screen.getByText("Não respondeu dentro de 15 segundos")).toBeInTheDocument();
   });
 
   it("offers the suggested amount, another amount and a retry when someone did not answer", () => {

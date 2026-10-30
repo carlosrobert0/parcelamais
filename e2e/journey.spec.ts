@@ -70,7 +70,7 @@ test("Delta times out: the journey moves on at 15s with Delta unavailable", asyn
   await expect(page.getByText(/Aguardando respostas/)).toBeVisible();
 
   await expect(lenderCard(page, "delta")).toHaveAttribute("data-status", "unavailable", { timeout: 17_000 });
-  await expect(lenderCard(page, "delta")).toContainText("Não respondeu dentro de 10 segundos");
+  await expect(lenderCard(page, "delta")).toContainText("Não respondeu dentro de 15 segundos");
   await expect(page.getByTestId("offer")).toHaveCount(9);
 });
 
