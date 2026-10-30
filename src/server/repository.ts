@@ -1,6 +1,6 @@
 import { and, eq, lt } from "drizzle-orm";
 import { LENDERS, lenderName } from "@/domain/lenders";
-import { DEADLINE_MS } from "@/domain/deadline";
+import { DEADLINE_MS, MAX_DEADLINE_MS } from "@/domain/deadline";
 import { buildOffers, type Approval, type Offer } from "@/domain/offers";
 import type { LenderOutcome } from "@/domain/orchestrator";
 import type { Scenario } from "@/domain/scenarios";
@@ -146,7 +146,7 @@ function toPreApproval(row: PreApprovalRow, resultRows: LenderResultRow[], selec
     scenario: row.scenario as Scenario,
     treatmentAmountCents: row.treatmentAmountCents,
     createdAt: row.createdAt.toISOString(),
-    deadlineAt: new Date(row.createdAt.getTime() + DEADLINE_MS).toISOString(),
+    deadlineAt: new Date(row.createdAt.getTime() + MAX_DEADLINE_MS).toISOString(),
     results,
     offers,
     selection: selectionRow ? toSelection(selectionRow, offers) : null,

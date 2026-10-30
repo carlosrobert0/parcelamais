@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eyebrow } from "@/components/ui/eyebrow";
 import { FieldGroup } from "@/components/ui/field";
-import { DEADLINE_MS } from "@/domain/deadline";
+import { MAX_DEADLINE_MS } from "@/domain/deadline";
 import { formatBRL } from "@/domain/format";
 import type { Scenario } from "@/domain/scenarios";
 import {
@@ -43,7 +43,7 @@ const EMPTY_VALUES: DefaultValues<PatientFormValues> = {
 };
 const PATIENT_FIELDS = Object.keys(patientSchema.shape);
 const SUBMIT_ERROR = "Não foi possível iniciar a consulta. Verifique a conexão e tente de novo.";
-const DEADLINE_SECONDS = DEADLINE_MS / 1000;
+const DEADLINE_SECONDS = MAX_DEADLINE_MS / 1000;
 
 const isPatientField = (field: string): field is FieldName => PATIENT_FIELDS.includes(field);
 

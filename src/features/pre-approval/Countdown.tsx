@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Progress } from "@/components/ui/progress";
-import { DEADLINE_MS } from "@/domain/deadline";
+import { MAX_DEADLINE_MS } from "@/domain/deadline";
 
 const TICK_MS = 250;
 
@@ -26,7 +26,7 @@ export function Countdown({ deadlineAt }: CountdownProps) {
       <p className="text-sm text-muted-foreground">
         {remainingSeconds > 0 ? `Aguardando respostas · no máximo ${remainingSeconds} s` : "Encerrando…"}
       </p>
-      <Progress value={100 - (remainingMs / DEADLINE_MS) * 100} aria-label="Tempo de espera" />
+      <Progress value={100 - (remainingMs / MAX_DEADLINE_MS) * 100} aria-label="Tempo de espera" />
     </div>
   );
 }
